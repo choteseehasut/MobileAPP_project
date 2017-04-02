@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>โปรแกรมค้นหาภาพยนต์</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1"  style="background-color: #cccccc;">
+	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+	<link rel="stylesheet" href="custom.css">
+</head>
+
+<body>
+
+	 	<div data-role="page" data-theme="b" id="splash" >
+        <div class="splash"></div>
+    </div>
+
+    <div data-role="page" id="movie-list">
+		    <div data-role="header">
+		    <div id="branding"  >
+
+		    <h1><center>โปรแกรมค้นหาภาพยนต์</center></h1>
+		    </div><!-- /header -->
+		    </div><!-- /branding -->
+		    <div data-role="content">
+		      <input type="search" name="keyword" id="search" value="" placeholder="โปรดพิมพ์เพื่อค้นหาภาพยนต์" >
+					<input type="button" onclick="searchItems($('#search').val())" data-theme="b"  value="ค้นหา">
+					<ul data-role="listview" data-inset="true" id="result">
+					</ul>
+
+		    </div><!-- /content -->
+
+
+    <!-- /page -->
+		<script type="text/javascript">
+				var globalID;
+				$(function() {
+            console.log('setTimeout');
+            setTimeout(hideSplash, 2000);
+        });
+        function hideSplash() {
+            $.mobile.changePage("#movie-list", "fade");
+        }
+				function searchItems(keyword){
+
+						console.log(keyword);
+
+						$.getJSON('http://www.omdbapi.com/?s=' + keyword, function(data){
+								 $('#result').empty();
+								 $.each(data["Search"], function(index, element) {
+				            var url = "#movie-detail";
+										var img = element.Poster;
+				            var listitem = '<li data-icon="info" id = "' + element.imdbID +'"><a href="' + url + '" data-transition="slide"><img src="'+ img +'" height="80" width="80"><h1>' + element.Title + '</h1><p>Year ' + element.Year + '</p><p>คลิกเพื่อดูรายละเอียด</p></a></li>';
+										$('#result').append(listitem);
+				            $('#result').listview('refresh');
+								});
+							}
+						);
+				}
+		</script>
+	</div>
+
+    <div data-role="page" id="movie-detail">
+		    <div data-role="header">
+		      <h1>รายละเอียดภาพยนต์</h1>
+
+		    </div><!-- /header -->
+		    <div data-role="content">
+						<div id="poster"></div>
+						<div id="title"></div>
+
+						<textarea cols="40" rows="8" name="plot" disabled="disabled" id="plot" value=""></textarea>
+
+						<label for="actor">นักแสดง</label>
+						<textarea cols="40" rows="8" name="actor" disabled="disabled" id="actor" value=""></textarea>
+
+						<label for="award">รางวัล</label>
+						<textarea cols="40" rows="8" name="award"  disabled="disabled" id="award" value=""></textarea>
+
+						<label for="rated">เรทหนัง</label>
+						<input type="text" name="rated"  disabled="disabled" id="rated" value="">
+
+						<label for="imdbRating">ความนิยม</label>
+						<input type="text" name="imdbRating"  disabled="disabled" id="imdbRating" value="">
+
+						<label for="itemid">เวลา</label>
+						<input type="text" name="runtime" disabled="disabled" id="runtime" value="">
+
+						<label for="desc">ประเภท</label>
+						<input type="text" name="genre" disabled="disabled" id="genre" value="">
+
+						<label for="year">ผู้กำกับ</label>
+						<input type="text" name="director" disabled="disabled" id="director" value="">
+
+						<label for="writer">ผู้เขียน</label>
+						<input type="text" name="writer" disabled="disabled" id="writer" value="">
+
+		    </div><!-- /content -->
+
+
+
+
+		    <div data-role="footer"  style="background: #cccccc;" >
+		      <center><p><a href="#movie-list"><font color=black>กลับ</font></a></p></center>
+		    </div><!-- /footer -->
+    </div><!-- /page -->
+    </div>
+
+				<script type="text/javascript">
+						$('#result').on('click', 'li', function() {
+							 console.log("clicked "+ this.id); // id of clicked li
+							 globalID = this.id;
+							 console.log("Gobal "+ globalID);
+
+					  });
+            $(document).on("pageshow", "#movie-detail", function() {
+                getDetail(globalID);
+            });
+            function getDetail(id) {
+							console.log("detail "+id);
+							console.log(window.location.search);
+							$.getJSON('http://www.omdbapi.com/?i=' + id, function(data) {
+										$('#poster').empty();
+										$('#title').empty();
+										$('#runtime').val(data.Runtime).show();
+										$('#genre').val(data.Genre).show();
+										$('#director').val(data.Director).show();
+										$('#writer').val(data.Writer).show();
+										$('#plot').val(data.Plot).show();
+										$('#actor').val(data.Actors).show();
+										$('#rated').val(data.Rated).show();
+										$('#imdbRating').val(data.imdbRating).show();
+										$('#award').val(data.Awards).show();
+										var pos = '<center><img src= "' + data.Poster + '" height="250" width="290"></center>';
+										$('#poster').append(pos);
+										var title = '<center><h4>' + data.Title + '</h4></center>';
+										$('#title').append(title);
+                });
+            }
+        </script>
+
+
+
+</html>
